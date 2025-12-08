@@ -1,0 +1,11 @@
+node_modules
+dist
+dist/**
+dist/build
+dist/dev
+dist/dev/**
+.nuxt
+coverage
+**/*.min.js
+*.bundle.js
+.eslintrc.cjs

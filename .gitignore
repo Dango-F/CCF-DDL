@@ -1,0 +1,46 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vite / Build
+dist/
+.vite/
+.cache/
+build/
+/.temp/
+
+# Logs
+*.log
+
+# Local env files
+.env
+.env.*.local
+
+# Editor directories and OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# TypeScript
+*.tsbuildinfo
+
+# Generated / lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Misc
+.DS_Store
+coverage/
+dist/
+
+# Ignore build artifact folders used by uni-app
+/.uniplugin/
+/.unbuild/
+
+accept_rates/
+md/

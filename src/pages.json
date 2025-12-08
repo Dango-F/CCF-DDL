@@ -1,0 +1,47 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "会议列表",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/favorites/favorites",
+			"style": {
+				"navigationBarTitleText": "我的收藏",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/detail/detail",
+			"style": {
+				"navigationBarTitleText": "会议详情"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "CCF会议截稿助手",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	"tabBar": {
+		"color": "#8E8E93",
+		"selectedColor": "#007AFF",
+		"borderStyle": "black",
+		"backgroundColor": "#FFFFFF",
+		"fontSize": "15px",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"text": "📋 会议"
+			},
+			{
+				"pagePath": "pages/favorites/favorites",
+				"text": "⭐ 收藏"
+			}
+		]
+	}
+}
