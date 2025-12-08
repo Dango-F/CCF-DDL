@@ -448,6 +448,7 @@ const addToCalendar = () => {
   .link {
     color: #1976d2;
     text-decoration: underline;
+    word-break:break-all;
   }
   
   .deadline {

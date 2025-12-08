@@ -7,7 +7,7 @@
 	- dev conventions / troubleshooting pointers
 -->
 
-# CCF DDL <img src="src/static/logo.png" alt="logo" width="30" />
+# CCF DDL <img src="unpackage/res/icons/1024x1024.png" alt="logo" width="30" />
 
 多端会议日程浏览器（基于 Vue 3 + uni-app + TypeScript + Pinia）
 最新发布与 APK 见：release
