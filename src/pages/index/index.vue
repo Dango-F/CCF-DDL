@@ -59,6 +59,7 @@
         <!-- 搜索框 -->
         <view class="search-bar">
           <input 
+            ref="searchInputRef"
             class="search-input" 
             type="text" 
             placeholder="🔍 搜索会议名称..." 
@@ -68,7 +69,8 @@
           <view 
             v-if="searchQuery" 
             class="clear-icon" 
-            @click="clearSearch"
+            @touchstart.prevent="clearSearch"
+            @mousedown.prevent="clearSearch"
           >
             <text class="clear-text">✕</text>
           </view>
@@ -146,7 +148,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { onPullDownRefresh } from '@dcloudio/uni-app';
 import { useConferenceStore } from '@/stores/conference';
 import ConferenceCard from '@/components/ConferenceCard.vue';
@@ -154,6 +156,7 @@ import ConferenceCard from '@/components/ConferenceCard.vue';
 const store = useConferenceStore();
 
 const searchQuery = ref('');
+const searchInputRef = ref<any>(null);
 const showPassed = ref(true);
 const showLevelPicker = ref(false);
 const showCategoryPicker = ref(false);
