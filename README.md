@@ -97,24 +97,8 @@ npx tsc --noEmit
 
 ---
 
-## 🧭 开发与贡献规范
-
-- 使用 `logger`（`src/utils/logger.ts`）代替 `console.*`，构建时去除控制台输出
-- 遵循 TypeScript 严格模式：尽量避免 `any`，优先 `unknown` + 类型守卫
-- `saveToCache` 现在返回 `boolean` 表示写入是否成功，调用方应检查
-
----
-
-## 🔒 许可与贡献
-
-开源许可（请在仓库添加 LICENSE，默认：MIT）。
-
-贡献：欢迎 PR、Issue、以及更多改进建议。请确保在 PR 中包含变更说明与必要的类型检查/测试。
-
----
-
 ## ✉️ 联系方式
 
 如需更多信息，请通过电子邮件联系我们： [1847539781@qq.com](mailto:1847539781@qq.com)
 
-# CCF DDL
+# CCF DDL <img src="src/static/logo.png" alt="logo" width="30" />
