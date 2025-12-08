@@ -9,7 +9,7 @@
 
 # CCF DDL <img src="src/static/logo.png" alt="logo" width="30" />
 
-多端会议日程浏览器（基于 Vue 3 + uni-app + TypeScript + Pinia）
+多端 CCF 会议截稿日程平台（基于 Vue 3 + uni-app + TypeScript + Pinia）
 最新发布与 APK 见：release
 
 ---
