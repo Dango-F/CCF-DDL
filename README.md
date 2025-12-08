@@ -7,9 +7,7 @@
 	- dev conventions / troubleshooting pointers
 -->
 
-# CCF DDL
-
-<img src="src/static/logo.png" alt="logo" width="30" />
+# CCF DDL <img src="src/static/logo.png" alt="logo" width="30" />
 
 多端会议日程浏览器（基于 Vue 3 + uni-app + TypeScript + Pinia）
 最新发布与说明见：`md/RELEASE.md`，常见错误与修复请查阅：`md/错误记录.md`。
@@ -54,8 +52,6 @@
 	<img src="screenshots/8.jpg" alt="关于页面" width="220px" style="margin:6px;" />
 	<img src="screenshots/9.jpg" alt="更多设置" width="220px" style="margin:6px;" />
 </div>
-
-> 想在 README 以原生 Markdown 显示（GitHub），图片引用路径保持 `screenshots/1.jpg` 等即可。
 
 ---
 
@@ -109,15 +105,6 @@ npx tsc --noEmit
 
 ---
 
-## 📚 文档与资源
-
-- 错误/修复记录：`md/错误记录.md`
-- 发布说明：`md/RELEASE.md`
-- 技术总结：`md/技术总结.md`
-- 开发文档：`md/开发文档.md`
-
----
-
 ## 🔒 许可与贡献
 
 开源许可（请在仓库添加 LICENSE，默认：MIT）。
@@ -130,57 +117,4 @@ npx tsc --noEmit
 
 如需更多信息，请通过电子邮件联系我们： [1847539781@qq.com](mailto:1847539781@qq.com)
 
----
-
-如果你希望我把 README 中的图片展示方式改为 GitHub native Markdown（`![Alt](screenshots/1.jpg)`），或添加带证书的运行演示（GIF），告诉我你偏好的展示方式，我会继续调整并把 README 更新到你指定风格。
-
 # CCF DDL
-
-这是一个基于 Vue 3 + Uni-app 的多端会议日程应用示例仓库。
-
-## 目录结构
-
-- src/: 源代码目录
-- md/: 项目文档与错误记录
-- static/: 静态资源
-- package.json: 项目脚本与依赖
-
-## 本地运行
-
-安装依赖
-
-```powershell
-npm install
-```
-
-开发模式运行（H5 或 App 模式请参考 uni-app 文档）
-
-## 本地运行
-
-npm run dev
-
-```
-
-构建生产包
-建议环境
-
-- Node.js: 18.x 或 20.x（建议使用 Node 22 进行本地开发）
-- npm 或 pnpm：推荐使用 npm 9 或 pnpm 8+
-- TypeScript: 遵循仓库内配置；如果遇到 ESLint parser 警告，请参考 `md/错误记录.md` 中的说明
-
-常用脚本
-
-- npm run dev: 启动开发服务器
-- npm run build: 构建生产包
-- npm run lint: 运行 ESLint（包括 TypeScript 检查）
-- npx tsc --noEmit: 仅执行 TypeScript 类型检查
-
-代码约定
-
-- 避免在 `src/` 内直接调用 `console.*`，请使用 `src/utils/logger.ts`。
-- 尽量避免 `any`，优先使用 `unknown` 并添加类型保护。
-- 生产构建中自动移除 `console.*`（请查看 `vite.config.ts` 中的配置）。
-
-```
-
-# CCF-DDL
