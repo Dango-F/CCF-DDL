@@ -65,7 +65,7 @@
 import { ref, onUnmounted } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import { useConferenceStore } from '@/stores/conference';
-// Build-time imported accept rate index (static)
+// 构建时导入的静态录用率索引
 import acceptRateIndex from '@/static/accept_rates/index.json';
 import type { Conference } from '@/stores/conference';
 import logger from '@/utils/logger';
@@ -75,16 +75,16 @@ import duration from 'dayjs/plugin/duration';
 dayjs.extend(duration);
 
 const store = useConferenceStore();
-// Name the component (script setup) to avoid single-word name lint
-// defineOptions is supported in Vue 3 SFC script setup
-// The defineOptions macro is recognized by Vue SFCs; you can add a TypeScript suppression directive if needed in some toolchains
+// 给组件命名（script setup）以避免单词名 lint 报警
+// Vue 3 SFC 的 script setup 支持 defineOptions
+// defineOptions 宏被 Vue SFC 识别；某些工具链下可添加 TypeScript 抑制指令
 defineOptions({ name: 'detail-page' });
 const conference = ref<Conference | undefined>(undefined);
 const countdownText = ref('');
 let timer: any = null;
 
 // #ifdef APP-PLUS
-// Android Native 对象缓存
+// Android 本地对象缓存
 let mainActivity: any = null;
 let IntentClass: any = null;
 let CalendarContractClass: any = null;
@@ -94,36 +94,36 @@ onLoad(async (options: any) => {
     if (options.id) {
     conference.value = store.getConferenceById(options.id);
     if (!conference.value) {
-      // Fallback if store is empty (e.g. direct entry), reload from cache
+      // 如果 store 为空（例如通过直接链接进入），则回退从缓存加载
       store.loadFromCache();
       conference.value = store.getConferenceById(options.id);
       if (!conference.value) {
-        // Only attempt a remote fetch if network is available; if offline, just show empty state
+        // 仅在网络可用时尝试远程抓取；离线时仅显示空状态
         if (!store.isNetworkError) {
           await store.fetchRemoteConferences();
           conference.value = store.getConferenceById(options.id);
         }
       }
     } else {
-      // If store had a cached conference, avoid triggering a network fetch when we discovered earlier that network is unavailable.
-      // Only refresh from network if we haven't set lastUpdated and we are online.
+      // 若 store 已有缓存会议，且之前判断网络不可用，则避免触发网络请求
+      // 只有在没有设置 lastUpdated 且在线时才从网络刷新
       if (!store.lastUpdated && !store.isNetworkError) {
         await store.fetchRemoteConferences();
         conference.value = store.getConferenceById(options.id);
       }
     }
     startCountdown();
-    // index.json is static and imported at build-time; no need to preload in store
+    // index.json 为静态文件并在构建时导入；无需在 store 中预先加载
     // 尝试直接加载合并 JSON 索引（如果未通过 store 设置录用率）
     try {
       if (conference.value && (!conference.value.acceptanceRate || conference.value.acceptanceRate === '暂无')) {
-        // first try store preloaded index, then fall back to index fetch
+        // 先尝试从 store 中使用预加载的索引，若无再回退到索引文件获取
         if (!conference.value.acceptanceRate || conference.value.acceptanceRate === '暂无') {
-          // refresh from store if loadLocalAcceptRates populated it
+          // 如果 loadLocalAcceptRates 填充了索引，则从 store 刷新
           conference.value = store.getConferenceById(options.id) || conference.value;
         }
         if (!conference.value.acceptanceRate || conference.value.acceptanceRate === '暂无') {
-          // use build-time index (acceptRateIndex) to render acceptanceRate
+          // 使用构建时的 acceptRateIndex 来渲染录用率
           await loadAcceptRateFromIndex(conference.value);
         }
       }
@@ -271,7 +271,7 @@ const addToCalendarIOS = (title: string, deadline: string) => {
       fileEntry.createWriter((writer) => {
           writer.onwrite = () => {
           // 写入成功后，调用系统打开
-          // iOS 上 openFile 会自动识别 .ics 并弹出日历添加界面
+          // iOS 上调用 openFile 会自动识别 .ics 并弹出添加日历的界面
             plus.runtime.openFile(fileName, {}, (e) => {
             logger.error('打开文件失败', e);
             uni.showToast({ title: '打开日历失败', icon: 'none', duration: 1000 });
@@ -348,7 +348,7 @@ const addToCalendar = () => {
   // #endif
   
   // #ifdef H5
-  // H5 端：生成 .ics 文件下载
+  // H5 端：生成 .ics 文件并触发下载
   const h5Dtstart = dayjs(deadline).format('YYYYMMDDTHHmmss');
   const h5Dtend = dayjs(deadline).add(1, 'hour').format('YYYYMMDDTHHmmss');
   
@@ -477,8 +477,8 @@ const addToCalendar = () => {
 .add-calendar-btn {
   position: fixed;
   bottom: 20px;
-  bottom: calc(20px + constant(safe-area-inset-bottom)); /* iOS 11.0-11.2 */
-  bottom: calc(20px + env(safe-area-inset-bottom)); /* iOS 11.2+ */
+  bottom: calc(20px + constant(safe-area-inset-bottom)); /* iOS 11.0-11.2 兼容 */
+  bottom: calc(20px + env(safe-area-inset-bottom)); /* iOS 11.2 及以上 */
   left: 16px;
   right: 16px;
   background-color: #4caf50;

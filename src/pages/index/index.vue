@@ -18,7 +18,7 @@
             @click="toggleLevel(level)"
           >
             <text class="category-name">CCF {{ level }}</text>
-            <!-- Removed check icon to avoid layout shifts; selection only uses color change -->
+            <!-- 去掉勾选图标以避免布局抖动；选择只使用颜色变化 -->
           </view>
         </scroll-view>
         <view class="modal-footer">
@@ -43,7 +43,7 @@
             @click="toggleCategory(cat)"
           >
             <text class="category-name">{{ cat }}</text>
-            <!-- Removed check icon to avoid layout shifts; selection only uses color change -->
+            <!-- 去掉勾选图标以避免布局抖动；选择只使用颜色变化 -->
           </view>
         </scroll-view>
         <view class="modal-footer">
@@ -52,11 +52,11 @@
       </view>
     </view>
 
-    <!-- Conference List -->
+    <!-- 会议列表 -->
     <view class="conference-list">
       <!-- 顶部控件：搜索栏 + 筛选 -->
       <view class="top-controls">
-        <!-- Search Bar -->
+        <!-- 搜索框 -->
         <view class="search-bar">
           <input 
             class="search-input" 
@@ -67,7 +67,7 @@
           />
         </view>
 
-        <!-- Filters -->
+        <!-- 筛选器 -->
         <view class="filters">
           <view class="filter-picker" @click="showLevelPicker = true">
             <view class="picker-label">
@@ -120,7 +120,7 @@
           </view>
         </view>
         
-        <!-- TBD 的会议 -->
+        <!-- 待定（TBD）的会议 -->
         <conference-card 
           v-for="conf in tbdConferences" 
           :key="conf.id" 
@@ -231,7 +231,7 @@ const goToDetail = (id: string) => {
 }
 
   .top-controls {
-    /* 保持在滚动区域顶部（H5 支持 position:sticky），App 端一般也可用 */
+    /* 保持在滚动区域顶部（H5 支持 position:sticky），App 端通常也可用 */
     position: -webkit-sticky;
     position: sticky;
     top: 0;
@@ -241,7 +241,7 @@ const goToDetail = (id: string) => {
     padding-top: env(safe-area-inset-top, 0);
     /* 轻微阴影分隔内容 */
     box-shadow: 0 1px 0 rgba(0,0,0,0.04);
-    // border-bottom: 2px solid rgba(0,0,0,0.04);
+    // border-bottom: 2px solid rgba(0,0,0,0.04); /* 底部边框（已注释） */
     padding-bottom: 8px;
 
     .search-bar {
@@ -272,7 +272,7 @@ const goToDetail = (id: string) => {
           display: flex;
           align-items: center;
           justify-content: center;
-          /* 多文字时不要撑开控件，使用 ellipsis 隐藏过长文本 */
+          /* 多文字时不要撑开控件，使用 ellipsis 隐藏溢出文本 */
           overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
@@ -299,7 +299,7 @@ const goToDetail = (id: string) => {
     }
   }
 
-/* ConferenceCard.vue scoped style */
+/* ConferenceCard.vue 的局部样式 */
 :deep(.first-card) {
   margin-top: 10px;
 }
@@ -371,13 +371,13 @@ const goToDetail = (id: string) => {
       .passed-arrow {
       font-size: 12px;
       color: #999;
-      /* remove rotation transform; keep color only */
+      /* 移除旋转变换；仅保留颜色变化 */
       transition: none;
     }
   }
   
   .passed-list {
-    /* keep appearance change minimal: fade-in only (no translate) */
+    /* 让外观变化保持最小：仅淡入（不移动） */
     animation: fadeIn 0.2s ease;
   }
 }
@@ -439,7 +439,7 @@ const goToDetail = (id: string) => {
     justify-content: space-between;
     align-items: center;
     padding: 14px 16px 14px 16px;
-    // padding-right: 44px; /* 保留勾选图标空间，避免切换时布局抖动 */
+    // padding-right: 44px; /* 保留勾选图标空间，避免切换时布局抖动（已注释） */
     border-bottom: 1px solid #f5f5f5;
     
     &.selected {
@@ -451,7 +451,7 @@ const goToDetail = (id: string) => {
       color: #333;
     }
     
-    /* Removed check-icon visual (no check marks); selection uses background color change only */
+    /* 去掉勾选图标的视觉（无勾选符号），选择状态仅用背景色变化 */
   }
   
   .modal-footer {

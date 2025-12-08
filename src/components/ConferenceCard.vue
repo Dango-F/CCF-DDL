@@ -324,11 +324,11 @@ const getLevelClass = (level: string) => {
     .favorite-icon {
       font-size: 30px;
       color: #000;
-      transition: color 0.2s ease; /* only animate color, no transform */
+      transition: color 0.2s ease; /* 仅对颜色做动画，不做变换 */
       
       &.active {
         color: #ff9800;
-        /* remove transform scaling; only color changes */
+        /* 去掉 transform 缩放，仅改变颜色 */
       }
     }
   }

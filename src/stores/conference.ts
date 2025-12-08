@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import dayjs from 'dayjs';
 import logger from '@/utils/logger';
-// build-time import of index (static)
+// 构建时导入的静态索引
 import acceptRateIndexStatic from '@/static/accept_rates/index.json';
 import yaml from 'js-yaml';
 
@@ -22,7 +22,7 @@ export interface Conference {
   year?: number;
 }
 
-// Accept rate JSON structure (loose typing to support variety of YAML-derived shapes)
+// 录用率 JSON 结构（使用宽松类型以支持多种 YAML 解析结果）
 export interface AcceptRateEntry {
   str?: string;
   rate?: number | string;
@@ -33,7 +33,7 @@ export interface AcceptRateEntry {
 
 export type AcceptRateIndex = Record<string, AcceptRateEntry | AcceptRateEntry[]>;
 
-// Parsed YAML shapes for conference list
+// 解析后的会议列表 YAML 形状定义
 export interface RawTimelineItem { deadline?: string; abstract_deadline?: string; [k: string]: unknown }
 export interface RawConf { id?: string; year?: number; timeline?: RawTimelineItem[]; timezone?: string; date?: string; place?: string; link?: string; [k: string]: unknown }
 export interface RawParsedItem { title: string; description?: string; sub?: string; rank?: string | { ccf?: string }; dblp?: string; confs?: RawConf[]; [k: string]: unknown }
@@ -83,10 +83,10 @@ export const useConferenceStore = defineStore('conference', {
     isNetworkError: false,
     lastUpdated: 0,
     favorites: [] as string[],  // 收藏的会议 ID 列表
-    // accept rate index & session flags
+    // 录用率索引与会话标志
     acceptRateIndex: null as AcceptRateIndex | null,
     acceptRatesLoadedThisSession: false as boolean,
-    // concurrent fetch guard
+    // 并发请求保护（避免重复抓取）
     fetchConferencesPromise: null as Promise<void> | null,
     acceptRateIndexLoadPromise: null as Promise<void> | null
   }),
@@ -95,13 +95,13 @@ export const useConferenceStore = defineStore('conference', {
     _categorizedConferences: (state) => {
       const now = dayjs();
       
-      // Helper for CCF Level ranking
+      // CCF 等级排序辅助函数
       const getLevelRank = (level: string) => {
         const map: Record<string, number> = { 'A': 1, 'B': 2, 'C': 3 };
         return map[level] || 4;
       };
 
-      // Filter conferences
+      // 过滤会议列表
       const filtered = state.conferences.filter((conf) => {
         const matchesSearch = conf.title.toLowerCase().includes(state.searchQuery.toLowerCase()) || 
                               conf.fullTitle.toLowerCase().includes(state.searchQuery.toLowerCase());
@@ -110,7 +110,7 @@ export const useConferenceStore = defineStore('conference', {
         return matchesSearch && matchesLevel && matchesCategory;
       });
 
-      // Partition into upcoming, passed, and TBD
+      // 将会议分为：即将进行、已过期、待定
       const upcoming: typeof filtered = [];
       const passed: typeof filtered = [];
       const tbd: typeof filtered = [];
@@ -125,21 +125,21 @@ export const useConferenceStore = defineStore('conference', {
         }
       });
 
-      // Sort upcoming: ascending (soonest first), then by CCF Level
+      // 对即将进行的会议按时间升序（最近的在前），再按 CCF 等级排序
       upcoming.sort((a, b) => {
         const diff = dayjs(a.deadline).valueOf() - dayjs(b.deadline).valueOf();
         if (diff !== 0) return diff;
         return getLevelRank(a.ccfLevel) - getLevelRank(b.ccfLevel);
       });
       
-      // Sort passed: descending (most recently passed first), then by CCF Level
+      // 对已结束的会议按时间降序（最近的在前），再按 CCF 等级排序
       passed.sort((a, b) => {
         const diff = dayjs(b.deadline).valueOf() - dayjs(a.deadline).valueOf();
         if (diff !== 0) return diff;
         return getLevelRank(a.ccfLevel) - getLevelRank(b.ccfLevel);
       });
       
-      // Sort TBD: by CCF Level
+      // 对待定会议按 CCF 等级排序
       tbd.sort((a, b) => getLevelRank(a.ccfLevel) - getLevelRank(b.ccfLevel));
 
       return { upcoming, passed, tbd };
@@ -155,7 +155,7 @@ export const useConferenceStore = defineStore('conference', {
       return this._categorizedConferences.passed;
     },
     
-    // TBD 的会议
+    // 待定（TBD）会议
     tbdConferences(): Conference[] {
       return this._categorizedConferences.tbd;
     },
@@ -208,14 +208,14 @@ export const useConferenceStore = defineStore('conference', {
           logger.debug('saveToCache: 无有效数据，保持旧缓存');
           return false;
         }
-        // Write new cache to temp keys first to reduce downtime
+        // 先写入临时缓存键以减少切换时的不可用窗口
         try {
           uni.setStorageSync('conferences_cache_tmp', data);
           uni.setStorageSync('conferences_cache_time_tmp', Date.now());
         } catch (e) {
           logger.warn('写入临时缓存失败，尝试直接写入主缓存', e);
         }
-        // Promote temp to main cache
+        // 将临时缓存提升为主缓存
         try {
           const tmp = uni.getStorageSync('conferences_cache_tmp');
           const tmpTime = uni.getStorageSync('conferences_cache_time_tmp');
@@ -226,7 +226,7 @@ export const useConferenceStore = defineStore('conference', {
             uni.setStorageSync('conferences_cache_time', tmpTime || Date.now());
             logger.debug('已写入新缓存（主键）');
           } else {
-            // fallback: write main directly
+            // 回退：直接写入主缓存
             uni.setStorageSync('conferences_cache', data);
             uni.setStorageSync('conferences_cache_time', Date.now());
             logger.debug('已写入新缓存（直接写入）');
@@ -236,7 +236,7 @@ export const useConferenceStore = defineStore('conference', {
           uni.setStorageSync('conferences_cache', data);
           uni.setStorageSync('conferences_cache_time', Date.now());
         }
-        // Clean up temp and any old keys, then log deletion
+        // 清理临时缓存与旧键，并记录删除日志
         let cleaned = false;
         try {
           const tmpExists = uni.getStorageSync('conferences_cache_tmp');
@@ -244,14 +244,14 @@ export const useConferenceStore = defineStore('conference', {
             uni.removeStorageSync('conferences_cache_tmp');
             cleaned = true;
           }
-        } catch { /* ignore */ }
+        } catch { /* 忽略错误 */ }
         try {
           const tmpTimeExists = uni.getStorageSync('conferences_cache_time_tmp');
           if (tmpTimeExists) {
             uni.removeStorageSync('conferences_cache_time_tmp');
             cleaned = true;
           }
-        } catch { /* ignore */ }
+        } catch { /* 忽略错误 */ }
         if (cleaned) logger.debug('已删除所有旧缓存');
         logger.debug('数据已缓存到本地，共', data.length, '条');
         return true;
@@ -265,8 +265,8 @@ export const useConferenceStore = defineStore('conference', {
       if (this.acceptRateIndexLoadPromise) return await this.acceptRateIndexLoadPromise;
       this.acceptRateIndexLoadPromise = (async () => {
         try {
-          // Try to load the index JSON
-          // Use the build-time static index instead of runtime fetching
+          // 尝试加载索引 JSON
+          // 优先使用构建时静态索引，避免运行时请求
           this.acceptRateIndex = acceptRateIndexStatic as AcceptRateIndex;
 
           const basePaths = ['/static/accept_rates', './static/accept_rates', '/accept_rates', './accept_rates'];
@@ -274,14 +274,14 @@ export const useConferenceStore = defineStore('conference', {
             if (!conf.sub || !conf.dblp) return;
             if (this.acceptRateIndex) {
               const key = `${conf.sub}/${conf.dblp}`;
-              // try multiple key forms
+              // 尝试多种键名形式
               const candidates = [key, key.toLowerCase(), `${conf.sub}/${conf.dblp.replace(/\./g, '')}`, `${conf.sub}/${conf.dblp.replace(/\./g, '-').toLowerCase()}`];
               let idxData: AcceptRateEntry | AcceptRateEntry[] | null = null;
               for (const c of candidates) {
                 if (this.acceptRateIndex[c]) { idxData = this.acceptRateIndex[c]; break; }
               }
               if (idxData) {
-                // normalize `idxData` to a single AcceptRateEntry for easier property access
+                // 将 idxData 规范化为单一 AcceptRateEntry 以便访问属性
                 let data: AcceptRateEntry;
                 if (Array.isArray(idxData) && idxData.length > 0) data = idxData[0] as AcceptRateEntry;
                 else data = idxData as AcceptRateEntry;
@@ -290,15 +290,16 @@ export const useConferenceStore = defineStore('conference', {
                     if (!acc || !acc.year || (cur && cur.year && cur.year > acc.year)) return cur;
                     return acc;
                   }, null as AcceptRateEntry | null);
-                  if (latest && latest.str) { conf.acceptanceRate = String(latest.str); logger.debug('Loaded acceptanceRate (index) for', conf.id, conf.sub, conf.dblp, conf.acceptanceRate); return; }
+                  if (latest && latest.str) { conf.acceptanceRate = String(latest.str); logger.debug('Loaded acceptanceRate (index) for', conf.id, conf.sub, conf.dblp, '→', conf.acceptanceRate); return; }
                     if (latest && latest.rate !== undefined && latest.rate !== null) {
                     const v = String(latest.rate).replace(',', '.');
                     const n = Number(v);
-                    if (!Number.isNaN(n)) { conf.acceptanceRate = (n * 100).toFixed(1) + '%'; return; }
+                    // 只有在 0-1 范围内的小数才认为是合法录用率（需要乘以100）
+                    if (!Number.isNaN(n) && n >= 0 && n <= 1) { conf.acceptanceRate = (n * 100).toFixed(1) + '%'; logger.debug('Loaded acceptanceRate (index) for', conf.id, conf.sub, conf.dblp, '→', conf.acceptanceRate); return; }
                   }
                 }
-                if (typeof data === 'object' && data !== null && 'str' in data && (data as AcceptRateEntry).str) { conf.acceptanceRate = String((data as AcceptRateEntry).str); logger.debug('Loaded acceptanceRate (index top-level) for', conf.id, conf.sub, conf.dblp, conf.acceptanceRate); return; }
-                if (typeof data === 'object' && data !== null && 'rate' in data && (data as AcceptRateEntry).rate !== undefined && (data as AcceptRateEntry).rate !== null) { const v = String((data as AcceptRateEntry).rate).replace(',', '.'); const n = Number(v); if (!Number.isNaN(n)) { conf.acceptanceRate = (n * 100).toFixed(1) + '%'; logger.debug('Loaded acceptanceRate (index top-level numeric) for', conf.id, conf.sub, conf.dblp, conf.acceptanceRate); return; } }
+                if (typeof data === 'object' && data !== null && 'str' in data && (data as AcceptRateEntry).str) { conf.acceptanceRate = String((data as AcceptRateEntry).str); logger.debug('Loaded acceptanceRate (index top-level) for', conf.id, conf.sub, conf.dblp, '→', conf.acceptanceRate); return; }
+                if (typeof data === 'object' && data !== null && 'rate' in data && (data as AcceptRateEntry).rate !== undefined && (data as AcceptRateEntry).rate !== null) { const v = String((data as AcceptRateEntry).rate).replace(',', '.'); const n = Number(v); if (!Number.isNaN(n) && n >= 0 && n <= 1) { conf.acceptanceRate = (n * 100).toFixed(1) + '%'; logger.debug('Loaded acceptanceRate (index top-level) for', conf.id, conf.sub, conf.dblp, '→', conf.acceptanceRate); return; } }
               }
             }
 
@@ -344,7 +345,8 @@ export const useConferenceStore = defineStore('conference', {
                         rateStr = String(valid.str);
                       } else {
                         const tryRate = parseNumber(valid.rate);
-                        if (!isNaN(tryRate)) { rateStr = (tryRate * 100).toFixed(1) + '%'; }
+                        // 只有在 0-1 范围内的小数才认为是合法录用率
+                        if (!isNaN(tryRate) && tryRate >= 0 && tryRate <= 1) { rateStr = (tryRate * 100).toFixed(1) + '%'; }
                       }
                     }
                   }
@@ -359,12 +361,12 @@ export const useConferenceStore = defineStore('conference', {
                       return NaN;
                     };
                       if (typeof data === 'object' && data !== null && (data as AcceptRateEntry).str) { rateStr = String((data as AcceptRateEntry).str); }
-                      else { const tryRate2 = parseNumber((typeof data === 'object' && data !== null) ? (data as AcceptRateEntry).rate : (typeof data === 'string' ? data : undefined)); if (!isNaN(tryRate2)) rateStr = (tryRate2 * 100).toFixed(1) + '%'; }
+                      else { const tryRate2 = parseNumber((typeof data === 'object' && data !== null) ? (data as AcceptRateEntry).rate : (typeof data === 'string' ? data : undefined)); if (!isNaN(tryRate2) && tryRate2 >= 0 && tryRate2 <= 1) rateStr = (tryRate2 * 100).toFixed(1) + '%'; }
                   }
-                  if (rateStr) { conf.acceptanceRate = rateStr; logger.debug('Loaded acceptanceRate (file) for', conf.id, conf.sub, conf.dblp, conf.acceptanceRate); return; }
+                  if (rateStr) { conf.acceptanceRate = rateStr; logger.debug('Loaded acceptanceRate (file) for', conf.id, conf.sub, conf.dblp, '→', conf.acceptanceRate); return; }
                 }
                 } catch {
-                  // try next base
+                  // 尝试下一个基础路径
                 }
             }
           };
@@ -382,7 +384,7 @@ export const useConferenceStore = defineStore('conference', {
       return await this.acceptRateIndexLoadPromise;
     },
     async fetchRemoteConferences() {
-      // Prevent concurrent fetches — reuse the same promise if already fetching
+      // 防止并发抓取：若已有请求在进行中则复用对应的 Promise
       if (this.fetchConferencesPromise) {
         return await this.fetchConferencesPromise;
       }
@@ -393,7 +395,7 @@ export const useConferenceStore = defineStore('conference', {
       let isOnline = true;
       
       // #ifdef APP-PLUS
-      // App 端使用 uni.getNetworkType，更可靠
+      // App 端使用 uni.getNetworkType 来检测网络状态（更可靠）
       try {
         const networkInfo = await new Promise<UniApp.GetNetworkTypeSuccess>((resolve, reject) => {
           uni.getNetworkType({
@@ -409,7 +411,7 @@ export const useConferenceStore = defineStore('conference', {
       // #endif
       
       // #ifdef H5
-      // H5 端通过实际请求检测
+      // H5 端通过实际请求检测联网可用性
       try {
         const testUrl = 'https://www.baidu.com/favicon.ico?_=' + Date.now();
         if (typeof fetch !== 'undefined') {
@@ -426,7 +428,7 @@ export const useConferenceStore = defineStore('conference', {
       // #endif
       
       try {
-        // Only use the official ccfddl.com source
+        // 仅使用官方 ccfddl.com 的数据源
         const urls = [
           'https://ccfddl.com/conference/allconf.yml'
         ];
@@ -441,12 +443,12 @@ export const useConferenceStore = defineStore('conference', {
               uni.request({
                 url: url,
                 method: 'GET',
-                timeout: 8000, // Increased timeout
+                timeout: 8000, // 增加超时时间
                 success: (res) => {
                   if (res.statusCode === 200) {
                     resolve(res.data as string);
                   } else {
-                    // Some proxies return 404 if file not found or repo private (unlikely here)
+                    // 某些代理在文件不存在或仓库私有时会返回 404（此处不太可能）
                     reject(new Error(`Request failed with status ${res.statusCode}`));
                   }
                 },
@@ -454,17 +456,17 @@ export const useConferenceStore = defineStore('conference', {
               });
             });
             
-            // Basic validation to ensure we got YAML and not an HTML error page
+            // 基本校验：确保拿到的是 YAML，而不是 HTML 错误页面
             if (response && (response.startsWith('-') || response.includes('title:'))) {
                 fetchSuccess = true;
                 logger.debug(`Successfully fetched from: ${url}`);
-                break; // Stop if successful
+                break; // 成功则停止尝试
             } else {
                 logger.warn(`Invalid response format from ${url}`);
             }
           } catch (e) {
             logger.warn(`Failed to fetch from ${url}`, e);
-            // Continue to next mirror
+            // 继续尝试下一个镜像
           }
         }
 
@@ -549,7 +551,7 @@ export const useConferenceStore = defineStore('conference', {
               
               // 简单处理时区偏移
               if (timezone === 'AoE' || timezone === 'UTC-12') {
-                // AoE (Anywhere on Earth) = UTC-12，加12小时转换为UTC，再加8小时转换为北京时间
+                // AoE（Anywhere on Earth = UTC-12）处理：加 12 小时转为 UTC，再加 8 小时转为北京时间
                 const dlDate = dayjs(deadlineStr).add(20, 'hour');
                 deadlineStr = dlDate.format('YYYY-MM-DD HH:mm:ss');
               } else if (timezone.startsWith('UTC')) {
@@ -617,22 +619,22 @@ export const useConferenceStore = defineStore('conference', {
 
         if (newConferences.length > 0) {
           this.conferences = newConferences;
-          // Attempt to load bundled index JSON at `/static/accept_rates/index.json` first (works in H5 and App bundles)
-          // do not auto-load accept_rates index at global fetch stage; index is static and detail page will use it for rendering
+          // 优先尝试加载捆绑在 `/static/accept_rates/index.json` 的索引（在 H5 和 App 中有效）
+          // 在全局抓取阶段不自动加载 accept_rates 索引；索引为静态文件，详情页渲染时再使用
           try {
             const basePaths = ['/static/accept_rates', './static/accept_rates', '/accept_rates', './accept_rates'];
             const updateAcceptanceRate = async (conf: Conference) => {
               if (!conf.sub || !conf.dblp) return;
-              // check index first
+              // 先从索引中查找
               if (this.acceptRateIndex) {
                 const key = `${conf.sub}/${conf.dblp}`;
                 const idxData = this.acceptRateIndex[key];
                 if (idxData) {
-                  // idxData may be an array or an object; normalize to `AcceptRateEntry`
+                  // idxData 可能是数组或对象，统一规范化为 `AcceptRateEntry`
                   let data: AcceptRateEntry;
                   if (Array.isArray(idxData) && idxData.length > 0) data = idxData[0] as AcceptRateEntry;
                   else data = idxData as AcceptRateEntry;
-                  // try accept_rates array inside
+                  // 若包含 accept_rates 数组则优先使用
                   if (Array.isArray(data.accept_rates) && data.accept_rates.length > 0) {
                     const latest = data.accept_rates.reduce((acc: AcceptRateEntry | null, cur: AcceptRateEntry) => {
                       if (!acc || !acc.year || (cur && cur.year && cur.year > acc.year)) return cur;
@@ -645,15 +647,16 @@ export const useConferenceStore = defineStore('conference', {
                     if (latest && latest.rate !== undefined && latest.rate !== null) {
                       const v = String(latest.rate).replace(',', '.');
                       const n = Number(v);
-                      if (!Number.isNaN(n)) {
+                      // 只有在 0-1 范围内的小数才认为是合法录用率
+                      if (!Number.isNaN(n) && n >= 0 && n <= 1) {
                         conf.acceptanceRate = (n * 100).toFixed(1) + '%';
                         return;
                       }
                     }
                   }
-                  // top-level fallback
+                  // 顶层字段回退（如果没有 accept_rates）
                   if (data.str) { conf.acceptanceRate = String(data.str); return; }
-                  if (data.rate !== undefined && data.rate !== null) { const v = String(data.rate).replace(',', '.'); const n = Number(v); if (!Number.isNaN(n)) { conf.acceptanceRate = (n * 100).toFixed(1) + '%'; return; } }
+                  if (data.rate !== undefined && data.rate !== null) { const v = String(data.rate).replace(',', '.'); const n = Number(v); if (!Number.isNaN(n) && n >= 0 && n <= 1) { conf.acceptanceRate = (n * 100).toFixed(1) + '%'; return; } }
                 }
               }
               for (const base of basePaths) {
@@ -668,12 +671,12 @@ export const useConferenceStore = defineStore('conference', {
                     if (Array.isArray(rawData)) data = rawData as AcceptRateEntry[];
                     else if (typeof rawData === 'object' && rawData !== null) data = rawData as AcceptRateEntry;
                     else data = String(rawData || '');
-                      // Prefer `accept_rates` array – support multiple JSON layouts
+                      // 优先使用 `accept_rates` 数组，支持多种 JSON 布局
                       let rateStr: string | undefined;
-                      // Determine array of rate entries
+                      // 确定录用率条目数组
                       let arr: AcceptRateEntry[] | null = null;
                       if (Array.isArray(data)) {
-                        // Some YAMLs are parsed to an array that contains an object whose `accept_rates` is an array
+                        // 部分 YAML 解析出来的结果是：数组中包含一个对象，而该对象的 `accept_rates` 字段是数组
                         if (data.length > 0 && data[0] && Array.isArray((data[0] as AcceptRateEntry).accept_rates)) {
                           arr = (data[0] as AcceptRateEntry).accept_rates as AcceptRateEntry[];
                         } else {
@@ -688,30 +691,31 @@ export const useConferenceStore = defineStore('conference', {
                           return acc;
                         }, null as AcceptRateEntry | null);
                       if (valid) {
-                          // support string rates with comma decimal, numeric value or a `str` display
+                          // 支持带逗号小数的字符串形式、数字形式或 `str` 文本显示的录用率
                           const parseNumber = (v: unknown): number => {
                             if (v === undefined || v === null) return NaN;
                             if (typeof v === 'number') return v as number;
                             if (typeof v === 'string') {
-                              // normalize comma decimal
+                              // 将逗号小数统一为点小数
                               const s = v.trim().replace(/,/g, '.').match(/[0-9]*\.?[0-9]+/);
                               if (s) return Number(s[0]);
                             }
                             return NaN;
                           };
-                          // Prefer full `str` value (e.g. "22.1%(2878/13008 25')") if present
+                          // 若存在完整的 `str` 字段（如 "22.1%(2878/13008 25')"），优先使用
                           if (valid.str) {
                             rateStr = String(valid.str);
                           } else {
                             const tryRate = parseNumber(valid.rate);
-                            if (!isNaN(tryRate)) {
+                            // 只有在 0-1 范围内的小数才认为是合法录用率
+                            if (!isNaN(tryRate) && tryRate >= 0 && tryRate <= 1) {
                               rateStr = (tryRate * 100).toFixed(1) + '%';
                             }
                           }
                       }
                     }
                     if (!rateStr) {
-                      // support rate as string/number
+                      // 支持 rate 为字符串或数字情况
                       const parseNumber = (v: unknown): number => {
                         if (v === undefined || v === null) return NaN;
                         if (typeof v === 'number') return v as number;
@@ -721,30 +725,31 @@ export const useConferenceStore = defineStore('conference', {
                         }
                         return NaN;
                       };
-                      // Prefer `str` string first, then numeric `rate` (with comma support)
+                      // 优先选择 `str` 字段，其次使用 numeric `rate`（支持逗号小数）
                       if (typeof data === 'object' && data !== null && (data as AcceptRateEntry).str) {
                         rateStr = String((data as AcceptRateEntry).str);
                       } else {
                         const tryRate2 = parseNumber((typeof data === 'object' && data !== null) ? (data as AcceptRateEntry).rate : (typeof data === 'string' ? data : undefined));
-                        if (!isNaN(tryRate2)) {
+                        // 只有在 0-1 范围内的小数才认为是合法录用率
+                        if (!isNaN(tryRate2) && tryRate2 >= 0 && tryRate2 <= 1) {
                           rateStr = (tryRate2 * 100).toFixed(1) + '%';
                         }
                       }
                     }
                     if (rateStr) {
                       conf.acceptanceRate = rateStr;
-                      logger.debug('Loaded acceptanceRate for', conf.id, conf.sub, conf.dblp, rateStr);
+                      logger.debug('Loaded acceptanceRate for', conf.id, '(', conf.sub + '/' + conf.dblp, ')', '→', rateStr);
                       return;
                     }
                   }
                 } catch {
-                // try next base
+                // 尝试下一个基础路径
               }
               }
             };
             const jobs: Promise<void>[] = [];
             for (const conf of newConferences) jobs.push(updateAcceptanceRate(conf));
-            // Wait for all updates to finish
+            // 等待所有更新完成
             await Promise.allSettled(jobs);
           } catch (e) {
             logger.warn('load local acceptance rates failed', e);
@@ -779,7 +784,7 @@ export const useConferenceStore = defineStore('conference', {
         }
       } finally {
         this.isLoading = false;
-        // release fetch guard
+        // 释放抓取保护（fetch guard）
         this.fetchConferencesPromise = null;
       }
       return;

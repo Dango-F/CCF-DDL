@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import uni from "@dcloudio/vite-plugin-uni";
 
-// https://vitejs.dev/config/
+// Vite 配置参考：https://vitejs.dev/config/
 export default defineConfig({
   base: './',
   plugins: [uni()],
@@ -17,7 +17,7 @@ export default defineConfig({
   },
   server: {
     host: "0.0.0.0",
-    // Vite default port is 5173; keep host for network accessibility
+    // Vite 默认端口是 5173；保留 host 以便局域网访问
     port: 5173,
   },
 });

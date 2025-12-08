@@ -1,13 +1,13 @@
 <!--
-	README for CCF DDL
-	- include project overview
-	- installation & run steps
-	- screenshot gallery
-	- release & docs links
-	- dev conventions / troubleshooting pointers
+	CCF DDL 的 README
+	- 包括项目概述
+	- 安装与运行步骤
+	- 截图画廊
+	- 发布版本与文档链接
+	- 开发约定 / 排错提示
 -->
 
-# CCF DDL <img src="unpackage/res/icons/1024x1024.png" alt="logo" width="30" />
+# CCF DDL <img src="src/static/logo.png" alt="logo" width="30" />
 
 多端会议日程浏览器（基于 Vue 3 + uni-app + TypeScript + Pinia）
 最新发布与 APK 见：release
@@ -41,17 +41,15 @@
 项目仓库包含一组屏幕截图（路径：`/screenshots`），示例：
 
 <!-- 屏幕截图网格 -->
-<div>
-	<img src="screenshots/1.jpg" alt="会议列表" width="220px" style="margin:6px;" />
-	<img src="screenshots/2.jpg" alt="筛选界面" width="220px" style="margin:6px;" />
-	<img src="screenshots/3.jpg" alt="详情页-上部" width="220px" style="margin:6px;" />
-	<img src="screenshots/4.jpg" alt="详情页-下部" width="220px" style="margin:6px;" />
-	<img src="screenshots/5.jpg" alt="加入日历成功" width="220px" style="margin:6px;" />
-	<img src="screenshots/6.jpg" alt="我的收藏/日程" width="220px" style="margin:6px;" />
-	<img src="screenshots/7.jpg" alt="搜索及筛选项" width="220px" style="margin:6px;" />
-	<img src="screenshots/8.jpg" alt="关于页面" width="220px" style="margin:6px;" />
-	<img src="screenshots/9.jpg" alt="更多设置" width="220px" style="margin:6px;" />
-</div>
+
+以下为示例截图（GitHub 推荐使用 Markdown 图像语法）:
+
+| ![会议列表](./screenshots/1.jpg)     | ![筛选界面](./screenshots/2.jpg)     | ![详情页-上部](./screenshots/3.jpg)   |
+| ------------------------------------ | ------------------------------------ | ------------------------------------- |
+| ![详情页-下部](./screenshots/4.jpg)  | ![加入日历成功](./screenshots/5.jpg) | ![我的收藏/日程](./screenshots/6.jpg) |
+| ![搜索及筛选项](./screenshots/7.jpg) | ![关于页面](./screenshots/8.jpg)     | ![更多设置](./screenshots/9.jpg)      |
+
+> 若想在 README 中引用本地图片，请使用相对路径（从 README 所在目录起）例如：`![屏幕截图](./screenshots/1.jpg)`。
 
 ---
 

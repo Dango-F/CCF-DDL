@@ -3,7 +3,7 @@ const path = require('path');
 const yaml = require('js-yaml');
 
 const SRC_DIR = path.join(__dirname, '..', 'accept_rates');
-// write to src/static so that build copies it into dist/build/h5/static
+// 写入到 src/static，这样构建时会被复制到 dist/build/h5/static
 const OUT_DIR = path.join(__dirname, '..', 'src', 'static', 'accept_rates');
 
 function walkSync(dir, callback) {
@@ -61,9 +61,9 @@ function convert() {
     }
   });
   console.log('convert complete');
-  // write index
+  // 写入索引文件
   const indexPath = path.join(OUT_DIR, '..', 'static', 'accept_rates', 'index.json');
-  // NOTE: OUT_DIR now is src/static/accept_rates, so indexPath = src/static/accept_rates/../static/accept_rates/index.json will be wrong. Fix: write to OUT_DIR/index.json
+  // 注意：OUT_DIR 现在是 src/static/accept_rates，因此以前的 indexPath（src/static/accept_rates/../static/accept_rates/index.json）会出错。修复方法：写入 OUT_DIR/index.json
   const indexOutPath = path.join(OUT_DIR, 'index.json');
   ensureDir(OUT_DIR);
   fs.writeFileSync(indexOutPath, JSON.stringify(index, null, 2), 'utf-8');
