@@ -65,6 +65,13 @@
             v-model="searchQuery"
             @input="onSearch"
           />
+          <view 
+            v-if="searchQuery" 
+            class="clear-icon" 
+            @click="clearSearch"
+          >
+            <text class="clear-text">✕</text>
+          </view>
         </view>
 
         <!-- 筛选器 -->
@@ -200,6 +207,11 @@ const onSearch = () => {
   store.setSearchQuery(searchQuery.value);
 };
 
+const clearSearch = () => {
+  searchQuery.value = '';
+  store.setSearchQuery('');
+};
+
 const toggleLevel = (level: string) => {
   store.toggleLevel(level);
 };
@@ -246,14 +258,42 @@ const goToDetail = (id: string) => {
 
     .search-bar {
       margin: 0 0 8px 0;
+      position: relative;
       
       .search-input {
         background-color: #fff;
         height: 40px;
         border-radius: 18px;
-        padding: 0 16px;
+        padding: 0 44px 0 16px; // 右侧留出空间给清除按钮
         font-size: 14px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+      
+      .clear-icon {
+        position: absolute;
+        right: 12px;
+        top: 10px; // (40px - 20px) / 2 = 10px，避免 transform 导致的亚像素渲染问题
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        transition: background-color 0.2s;
+        
+        &:active {
+          background-color: rgba(0, 0, 0, 0.25);
+        }
+        
+        .clear-text {
+          color: #fff;
+          font-size: 10px;
+          line-height: 1;
+          font-weight: bold;
+        }
       }
     }
 
