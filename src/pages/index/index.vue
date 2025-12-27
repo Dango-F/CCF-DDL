@@ -233,7 +233,7 @@ const clearCategories = () => {
 
 const goToDetail = (id: string) => {
   uni.navigateTo({
-    url: `/pages/detail/detail?id=${id}`
+    url: `/pages/detail/detail?id=${encodeURIComponent(id)}`
   });
 };
 </script>

@@ -91,47 +91,48 @@ let CalendarContractClass: any = null;
 // #endif
 
 onLoad(async (options: any) => {
-    if (options.id) {
-    conference.value = store.getConferenceById(options.id);
-    if (!conference.value) {
-      // 如果 store 为空（例如通过直接链接进入），则回退从缓存加载
-      store.loadFromCache();
-      conference.value = store.getConferenceById(options.id);
+    const id = options && options.id ? decodeURIComponent(String(options.id)) : undefined;
+    if (id) {
+      conference.value = store.getConferenceById(id);
       if (!conference.value) {
-        // 仅在网络可用时尝试远程抓取；离线时仅显示空状态
-        if (!store.isNetworkError) {
+        // 如果 store 为空（例如通过直接链接进入），则回退从缓存加载
+        store.loadFromCache();
+        conference.value = store.getConferenceById(id);
+        if (!conference.value) {
+          // 仅在网络可用时尝试远程抓取；离线时仅显示空状态
+          if (!store.isNetworkError) {
+            await store.fetchRemoteConferences();
+            conference.value = store.getConferenceById(id);
+          }
+        }
+      } else {
+        // 若 store 已有缓存会议，且之前判断网络不可用，则避免触发网络请求
+        // 只有在没有设置 lastUpdated 且在线时才从网络刷新
+        if (!store.lastUpdated && !store.isNetworkError) {
           await store.fetchRemoteConferences();
-          conference.value = store.getConferenceById(options.id);
+          conference.value = store.getConferenceById(id);
         }
       }
-    } else {
-      // 若 store 已有缓存会议，且之前判断网络不可用，则避免触发网络请求
-      // 只有在没有设置 lastUpdated 且在线时才从网络刷新
-      if (!store.lastUpdated && !store.isNetworkError) {
-        await store.fetchRemoteConferences();
-        conference.value = store.getConferenceById(options.id);
+      startCountdown();
+      // index.json 为静态文件并在构建时导入；无需在 store 中预先加载
+      // 尝试直接加载合并 JSON 索引（如果未通过 store 设置录用率）
+      try {
+        if (conference.value && (!conference.value.acceptanceRate || conference.value.acceptanceRate === '暂无')) {
+          // 先尝试从 store 中使用预加载的索引，若无再回退到索引文件获取
+          if (!conference.value.acceptanceRate || conference.value.acceptanceRate === '暂无') {
+            // 如果 loadLocalAcceptRates 填充了索引，则从 store 刷新
+            conference.value = store.getConferenceById(id) || conference.value;
+          }
+          if (!conference.value.acceptanceRate || conference.value.acceptanceRate === '暂无') {
+            // 使用构建时的 acceptRateIndex 来渲染录用率
+            await loadAcceptRateFromIndex(conference.value);
+          }
+        }
+      } catch (e) {
+        logger.warn('loadAcceptRateFromIndex failed', e);
       }
     }
-    startCountdown();
-    // index.json 为静态文件并在构建时导入；无需在 store 中预先加载
-    // 尝试直接加载合并 JSON 索引（如果未通过 store 设置录用率）
-    try {
-      if (conference.value && (!conference.value.acceptanceRate || conference.value.acceptanceRate === '暂无')) {
-        // 先尝试从 store 中使用预加载的索引，若无再回退到索引文件获取
-        if (!conference.value.acceptanceRate || conference.value.acceptanceRate === '暂无') {
-          // 如果 loadLocalAcceptRates 填充了索引，则从 store 刷新
-          conference.value = store.getConferenceById(options.id) || conference.value;
-        }
-        if (!conference.value.acceptanceRate || conference.value.acceptanceRate === '暂无') {
-          // 使用构建时的 acceptRateIndex 来渲染录用率
-          await loadAcceptRateFromIndex(conference.value);
-        }
-      }
-    } catch (e) {
-      logger.warn('loadAcceptRateFromIndex failed', e);
-    }
-  }
-});
+  });
 
 const loadAcceptRateFromIndex = (conf: any) => {
   return new Promise<void>((resolve) => {
