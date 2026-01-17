@@ -110,7 +110,7 @@
         
         <!-- 已截止会议的折叠区域 -->
         <view v-if="passedConferences.length > 0" class="passed-section">
-          <view class="passed-header" @click="togglePassed">
+          <view class="passed-header" :class="{ expanded: showPassed }" @click="togglePassed">
             <view class="passed-header-left">
               <text class="passed-icon">📋</text>
               <text class="passed-title">已截止的会议</text>
@@ -144,12 +144,16 @@
         </view>
       </template>
     </view>
+
+    <view class="back-top" :class="{ visible: showBackTop }" @click="scrollToTop">
+      <view class="arrow-up"></view>
+    </view>
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue';
-import { onPullDownRefresh } from '@dcloudio/uni-app';
+import { onPullDownRefresh, onPageScroll } from '@dcloudio/uni-app';
 import { useConferenceStore } from '@/stores/conference';
 import ConferenceCard from '@/components/ConferenceCard.vue';
 
@@ -160,6 +164,7 @@ const searchInputRef = ref<any>(null);
 const showPassed = ref(true);
 const showLevelPicker = ref(false);
 const showCategoryPicker = ref(false);
+const showBackTop = ref(false);
 const levels = ['A', 'B', 'C', 'N'];
 const categories = ['人工智能', '网络与信息安全', '计算机网络', '软件工程', '数据库', '计算机体系结构/并行与分布计算/存储系统', '计算机体系结构', '计算机系统', '人机交互', '计算机图形学与多媒体', '计算机理论', '交叉/综合/新兴'];
 
@@ -236,6 +241,31 @@ const goToDetail = (id: string) => {
     url: `/pages/detail/detail?id=${encodeURIComponent(id)}`
   });
 };
+
+const scrollToTop = () => {
+  uni.pageScrollTo({
+    scrollTop: 0,
+    duration: 200
+  });
+};
+
+let scrollTimer: ReturnType<typeof setTimeout> | null = null;
+
+onPageScroll((e) => {
+  // 滚动超过 600px 显示
+  if (e.scrollTop > 600) {
+    showBackTop.value = true;
+    
+    // 如果未点击，3秒后自动隐藏
+    if (scrollTimer) clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      showBackTop.value = false;
+    }, 3000);
+  } else {
+    showBackTop.value = false;
+    if (scrollTimer) clearTimeout(scrollTimer);
+  }
+});
 </script>
 
 <style lang="scss" scoped>
@@ -243,6 +273,49 @@ const goToDetail = (id: string) => {
   padding: 0 16px 16px 16px;
   background-color: #f5f7fa;
   min-height: 100vh;
+}
+
+.back-top {
+  position: fixed;
+  right: 20px;
+  bottom: 80px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  border: 1px solid rgba(0,0,0,0.05);
+  
+  /* 默认隐藏状态 */
+  opacity: 0;
+  transform: translateY(10px) scale(0.9);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  /* 显示状态 */
+  &.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  &:active {
+    transform: scale(0.92);
+    background-color: #f5f5f5;
+  }
+
+  .arrow-up {
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid #5c6b7f;
+    border-left: 2px solid #5c6b7f;
+    transform: rotate(45deg);
+    margin-top: 2px;
+  }
 }
 
   .top-controls {
@@ -373,18 +446,24 @@ const goToDetail = (id: string) => {
   }
 }
 
-.passed-section {
+  .passed-section {
   margin-top: 16px;
   
   .passed-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, #eef1f5 0%, #e6ebf2 100%);
     padding: 12px 16px;
     border-radius: 12px;
     margin-bottom: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: background 0.25s ease, box-shadow 0.25s ease;
+
+    &.expanded {
+      background: linear-gradient(135deg, #dfe7f3 0%, #cfe0f6 100%);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
     
     .passed-header-left {
       display: flex;
@@ -413,9 +492,13 @@ const goToDetail = (id: string) => {
     
       .passed-arrow {
       font-size: 12px;
-      color: #999;
-      /* 移除旋转变换；仅保留颜色变化 */
-      transition: none;
+      color: #7a7a7a;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    .passed-arrow.expanded {
+      transform: rotate(180deg);
+      color: #555;
     }
   }
   
